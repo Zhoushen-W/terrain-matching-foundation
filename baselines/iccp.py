@@ -92,7 +92,7 @@ class IccpLocator(BaseLocator):
             else None
         )
         contours = TerrainContours(self._field)
-        # Retain only the active window's geometry, without quantizing depths.
+        # 仅保留当前窗口的等深线几何，不对深度进行量化。
         segments = deque(
             contours.segments(level) for level in depths[: self._window_size]
         )

@@ -41,7 +41,7 @@ def _plot_trajectories(
     image_transform = Affine2D.from_values(
         transform.a, transform.d, transform.b, transform.e, transform.c, transform.f
     )
-    # Image coordinates describe pixel edges; track coordinates describe centers.
+    # 底图坐标描述像素边界，轨迹坐标描述像素中心。
     image = axes.imshow(
         terrain,
         cmap="terrain",

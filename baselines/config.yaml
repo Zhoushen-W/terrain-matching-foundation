@@ -1,4 +1,4 @@
-# Starting defaults; tune to map depth units, observation noise and INS errors.
+# 以下为实验初始默认值，应根据地图深度单位、观测噪声及 INS 误差调参。
 common:
   window_size: 64
   stride: 1

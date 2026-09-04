@@ -88,13 +88,13 @@ class LocatorTests(ConfigTestCase):
             assert_array_equal(original, current)
 
     def test_validation_and_invalid_config(self):
-        """验证非法数据、非有限输入和不支持的配置被明确拒绝。
+        """验证数组契约、有限性和配置取值范围约束。
 
         Args:
             无。
 
         Returns:
-            None: 断言配置和输入错误均触发 ValueError。
+            None: 断言违反必要数据约束和配置范围时触发 ValueError。
         """
         field, reference, depths = synthetic_data(count=8)
         path = self.config_path(self.small_config())
@@ -117,14 +117,11 @@ class LocatorTests(ConfigTestCase):
         configs = (
             {"common": {"stride": 2}},
             {"common": {"window_size": 0}},
-            {"pf": {"num_particles": 3.2}},
             {"pf": {"seed": -1}},
             {"pf": {"observation_std": 0}},
             {"pf": {"resample_threshold": 1.1}},
-            {"tercom": {"use_kf": "false"}},
             {"common": {"misspelled": 1}},
             {"iccp": {"init_step": float("nan")}},
-            {"common": {"window_size": True}},
         )
         for config in configs:
             with self.assertRaises(ValueError):
@@ -249,7 +246,7 @@ class LocatorTests(ConfigTestCase):
         first_particles = update.call_args_list[0].args[1]
         rng = np.random.default_rng(0)
         initial = reference[0] + rng.uniform(-4, 4, size=(512, 2))
-        # mock references may share later in-place predictions, so use a fresh cloud.
+        # 模拟调用保留的引用可能受到后续原地预测影响，因此使用新的粒子群。
         logs, _ = update_log_weights(
             field, initial, np.full(512, -np.log(512)), depths[0], 1
         )

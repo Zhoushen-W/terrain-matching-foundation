@@ -19,10 +19,8 @@ def _merge_config(defaults, overrides, prefix=""):
         dict: 合并后的独立配置。
 
     Raises:
-        ValueError: 配置结构或字段不合法。
+        ValueError: 配置包含未知字段。
     """
-    if not isinstance(overrides, dict):
-        raise ValueError(f"Configuration section {prefix or 'root'} must be a mapping")
     result = deepcopy(defaults)
     for key, value in overrides.items():
         name = f"{prefix}.{key}" if prefix else str(key)
@@ -36,41 +34,27 @@ def _merge_config(defaults, overrides, prefix=""):
 
 
 def _validate_config(config, prefix=""):
-    """校验配置的数值类型、范围和首版步长约束。
+    """按约定的字段类型校验数值范围和首版步长约束。
 
     Args:
-        config: 待校验的配置字典。
+        config: 字段类型符合默认配置约定的配置字典。
         prefix: 当前字段路径。
 
     Returns:
         None: 校验成功时正常返回。
 
     Raises:
-        ValueError: 字段类型或数值范围不合法。
+        ValueError: 数值非有限或超出允许范围。
     """
-    integer_fields = {
-        "window_size",
-        "stride",
-        "candidate_batch_size",
-        "max_iterations",
-        "num_particles",
-        "seed",
-    }
     for key, value in config.items():
         name = f"{prefix}.{key}" if prefix else key
         if isinstance(value, dict):
             _validate_config(value, name)
             continue
         if key == "use_kf":
-            if not isinstance(value, bool):
-                raise ValueError(f"{name} must be a boolean")
             continue
-        if isinstance(value, bool) or not isinstance(value, (int, float)):
-            raise ValueError(f"{name} must be a finite number")
         if not np.isfinite(value):
             raise ValueError(f"{name} must be finite")
-        if key in integer_fields and not isinstance(value, int):
-            raise ValueError(f"{name} must be an integer")
         allow_zero = (
             key.endswith("radius") or key.startswith("process_") or key == "seed"
         )
@@ -93,7 +77,7 @@ def load_config(default_path, config_path=None):
         dict: 经过校验的独立配置。
 
     Raises:
-        ValueError: YAML 结构、字段或数值不合法。
+        ValueError: 配置包含未知字段、非有限数值或非法范围。
         OSError: 配置文件无法读取。
     """
     with Path(default_path).open(encoding="utf-8") as stream:

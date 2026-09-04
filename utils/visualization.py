@@ -1,8 +1,6 @@
 """提供轨迹绘图共用的输入校验、地理坐标、时间和配色处理。"""
 
 import warnings
-from collections.abc import Mapping
-from numbers import Integral, Real
 
 import matplotlib as mpl
 import numpy as np
@@ -14,7 +12,7 @@ from utils.inputs import real_array
 
 
 def positive_scalar(value, name):
-    """校验绘图所需的正数参数。
+    """校验数值参数的有限性和正值范围。
 
     Args:
         value: 待校验的数值。
@@ -26,8 +24,6 @@ def positive_scalar(value, name):
     Raises:
         ValueError: 参数不是有限正数。
     """
-    if isinstance(value, (bool, np.bool_)) or not isinstance(value, Real):
-        raise ValueError(f"{name} must be a finite positive number")
     value = float(value)
     if not np.isfinite(value) or value <= 0:
         raise ValueError(f"{name} must be a finite positive number")
@@ -59,13 +55,13 @@ def validate_plot_trajectories(reference, ins, algorithms=None):
     Args:
         reference: 非空参考轨迹，形状为 (N, 2)。
         ins: 与参考轨迹同长度的 INS 轨迹。
-        algorithms: 可选的算法名称到 NumPy 轨迹的映射。
+        algorithms: 可选的算法名称到 NumPy 轨迹的映射，名称按约定为字符串。
 
     Returns:
         tuple: float64 参考轨迹、INS 轨迹及保持输入顺序的算法词典。
 
     Raises:
-        ValueError: 输入形状、名称或长度不合法。
+        ValueError: 轨迹形状、长度或数值不合法。
     """
     reference = _validate_path(reference, "reference_trajectory")
     ins = _validate_path(ins, "ins_trajectory")
@@ -75,12 +71,8 @@ def validate_plot_trajectories(reference, ins, algorithms=None):
         )
     if algorithms is None:
         algorithms = {}
-    if not isinstance(algorithms, Mapping):
-        raise ValueError("algorithm_trajectories must map names to NumPy trajectories")
     validated = {}
     for name, trajectory in algorithms.items():
-        if not isinstance(name, str) or not name.strip():
-            raise ValueError("Algorithm names must be nonempty strings")
         trajectory = _validate_path(trajectory, name)
         if len(trajectory) > len(reference):
             raise ValueError(
@@ -164,8 +156,6 @@ def read_georeferenced_terrain(terrain_path, band=1):
         ValueError: 文件类型、地理信息、波段或有效地形数据不合法。
         rasterio.errors.RasterioIOError: 无法读取输入文件。
     """
-    if isinstance(band, (bool, np.bool_)) or not isinstance(band, Integral):
-        raise ValueError("band must be an integer starting at 1")
     try:
         with warnings.catch_warnings():
             warnings.simplefilter("error", NotGeoreferencedWarning)

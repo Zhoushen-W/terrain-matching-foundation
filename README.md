@@ -4,13 +4,19 @@
 
 ## 安装与调用
 
-要求 Python 3.10 或以上。请在自己的项目环境中安装：
+代码支持 Python 3.10 或以上，项目开发使用 Conda 的 `Terrain` 环境（Python 3.12）。在项目根目录执行以下 PowerShell 命令安装运行依赖及 Ruff：
 
-```shell
-python -m pip install -e ".[dev]"
+```powershell
+& 'E:\Anaconda\envs\Terrain\python.exe' -m pip install -r requirements.txt
 ```
 
-运行依赖为 NumPy、SciPy、PyYAML、ContourPy、Matplotlib 和 Rasterio；开发依赖 Ruff，基线测试使用标准库 `unittest`。
+`requirements.txt` 与 `pyproject.toml` 中的运行依赖及 `dev` 依赖保持一致。运行依赖为 NumPy、SciPy、PyYAML、ContourPy、Matplotlib 和 Rasterio；开发依赖 Ruff，基线测试使用标准库 `unittest`。Python 命令始终使用该环境的解释器路径，避免子 shell 中激活环境不生效。
+
+若需在其他目录导入本库，可在该环境中进行可编辑安装：
+
+```powershell
+& 'E:\Anaconda\envs\Terrain\python.exe' -m pip install -e .
+```
 
 ```python
 from baselines import IccpLocator, PFLocator, TercomLocator
@@ -54,7 +60,7 @@ corrected = locator.localize_trajectory(
 
 ## 配置
 
-默认配置位于 `baselines/config.yaml`。`config_path` 可传入完整 YAML 或局部覆盖文件，未指定字段保留默认值。未知字段、类型错误和非法范围会明确报错。
+默认配置位于 `baselines/config.yaml`。`config_path` 可传入完整 YAML 或局部覆盖文件，未指定字段保留默认值。未知字段、非有限数值和非法范围会明确报错。基础类型遵循默认配置的约定，由调用方保证，不额外检查字典、整数或布尔类型，也不对类型误用统一包装异常。
 
 下面是一份局部覆盖示例：
 
@@ -209,11 +215,14 @@ error[i] = sqrt((algorithm_x[i] - reference_x[i])**2
 ```python
 import numpy as np
 
-timestamps = np.array([
-    "2026-09-04T10:00:00",
-    "2026-09-04T10:00:12",
-    "2026-09-04T10:00:29",
-], dtype="datetime64[s]")
+timestamps = np.array(
+    [
+        "2026-09-04T10:00:00",
+        "2026-09-04T10:00:12",
+        "2026-09-04T10:00:29",
+    ],
+    dtype="datetime64[s]",
+)
 ```
 
 此示例在三点输入中对应横坐标 `0, 12, 29` 秒。实际传入的时间戳数量须与完整参考轨迹长度一致。
@@ -224,10 +233,11 @@ timestamps = np.array([
 
 ## 基线验证
 
-```shell
-python -X utf8 -m unittest discover -s tests -t .
-ruff check .
-python -X utf8 -m tests.evaluate_accuracy --output .codex_tmp/accuracy.json
+```powershell
+& 'E:\Anaconda\envs\Terrain\python.exe' -X utf8 -m unittest discover -s tests -t .
+& 'E:\Anaconda\envs\Terrain\python.exe' -m ruff check .
+& 'E:\Anaconda\envs\Terrain\python.exe' -m ruff format --check .
+& 'E:\Anaconda\envs\Terrain\python.exe' -X utf8 -m tests.evaluate_accuracy --output .codex_tmp/accuracy.json
 ```
 
 精度实验包括整数平移、亚像素平移、航向误差、持续漂移及两档深度噪声；对照 KF 开关并运行五个 PF 种子。报告同时保存配置覆盖、RMSE、平均误差、95%分位误差、最大误差和运行时间。
@@ -246,4 +256,4 @@ scripts/      可导入的轨迹与定位误差绘图入口
 .codex_tmp/   临时配置与实验输出，任务结束后清理其临时内容
 ```
 
-遵循根目录 `AGENTS.md`：Python 文件说明和函数 Docstring 使用中文，普通代码注释、日志和业务字符串使用英文。业务校验抛出明确异常。新增代码执行 Ruff 检查。
+遵循根目录 `AGENTS.md`：Python 文件说明、函数 Docstring 和普通代码注释使用中文；日志、异常报错信息和业务字符串使用英文。保留必要的数组、取值范围及算法有效性校验，信任调用方提供的基础数据类型。新增代码执行 Ruff 规范检查与格式检查。

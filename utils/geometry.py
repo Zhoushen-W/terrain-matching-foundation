@@ -136,7 +136,7 @@ class TerrainContours:
         targets = np.full_like(points, np.nan)
         sampled = bilinear_sample(self.field, points)
         for index, (point, level, lines) in enumerate(zip(points, levels, segments)):
-            # A point already on a flat level set is its own closest point.
+            # 已位于平坦等深区域的点，其最近对应点就是自身。
             if sampled[index] == level:
                 targets[index] = point
             else:

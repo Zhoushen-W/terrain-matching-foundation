@@ -56,7 +56,7 @@ class TercomLocator(BaseLocator):
                     "TERCOM window %d has no valid match; retaining prior", start
                 )
             else:
-                # The fine grid includes its valid coarse center.
+                # 精搜索网格包含已验证有效的粗搜索中心。
                 fine, _ = mad_search(
                     self._field,
                     segment,

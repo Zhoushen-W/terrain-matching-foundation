@@ -1,0 +1,10 @@
+# 运行依赖，与 pyproject.toml 保持一致。
+numpy>=1.24
+scipy>=1.10
+PyYAML>=6.0
+contourpy>=1.1
+matplotlib>=3.7
+rasterio>=1.3
+
+# 开发规范检查工具，对应 pyproject.toml 的 dev 依赖。
+ruff>=0.8
