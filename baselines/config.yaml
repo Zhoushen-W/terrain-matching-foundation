@@ -1,0 +1,39 @@
+# Starting defaults; tune to map depth units, observation noise and INS errors.
+common:
+  window_size: 64
+  stride: 1
+  candidate_batch_size: 1024
+
+tercom:
+  coarse_radius: 32.0
+  coarse_step: 2.0
+  fine_radius: 2.0
+  fine_step: 0.25
+  use_kf: false
+  kalman:
+    initial_std: 32.0
+    process_std: 0.5
+    measurement_std: 1.0
+
+iccp:
+  init_radius: 32.0
+  init_step: 2.0
+  max_iterations: 50
+  translation_tolerance: 0.001
+  angle_tolerance: 0.0001
+  use_kf: false
+  kalman:
+    initial_std: 32.0
+    process_std: 0.5
+    measurement_std: 1.0
+    initial_angle_std_deg: 10.0
+    process_angle_std_deg: 0.1
+    measurement_angle_std_deg: 1.0
+
+pf:
+  num_particles: 4096
+  init_radius: 32.0
+  process_std: 0.5
+  observation_std: 1.0
+  resample_threshold: 0.5
+  seed: 0
