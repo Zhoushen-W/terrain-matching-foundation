@@ -56,6 +56,7 @@ class TercomLocator(BaseLocator):
                     "TERCOM window %d has no valid match; retaining prior", start
                 )
             else:
+                # The fine grid includes its valid coarse center.
                 fine, _ = mad_search(
                     self._field,
                     segment,
@@ -65,11 +66,7 @@ class TercomLocator(BaseLocator):
                     params["fine_step"],
                     self._batch_size,
                 )
-                # The fine grid includes its valid coarse center.
-                measurement = coarse if fine is None else fine
-                state = (
-                    kalman.update(measurement) if kalman is not None else measurement
-                )
+                state = kalman.update(fine) if kalman is not None else fine
             corrected[start] = ins[start] + state
         self.transform_ = state.copy()
         return corrected

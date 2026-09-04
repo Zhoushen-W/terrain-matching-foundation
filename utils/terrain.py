@@ -29,7 +29,7 @@ def bilinear_sample(field, points):
     """按像素中心坐标向量化采样地形。
 
     Args:
-        field: 形状为 (H, W) 的地形栅格。
+        field: 已校验的形状为 (H, W) 的地形栅格。
         points: 最后一维为 [x, y] 的坐标数组。
 
     Returns:
@@ -41,8 +41,7 @@ def bilinear_sample(field, points):
     flat = points.reshape(-1, 2)
     height, width = field.shape
     valid = (
-        np.isfinite(flat).all(axis=1)
-        & (flat[:, 0] >= 0)
+        (flat[:, 0] >= 0)
         & (flat[:, 0] <= width - 1)
         & (flat[:, 1] >= 0)
         & (flat[:, 1] <= height - 1)

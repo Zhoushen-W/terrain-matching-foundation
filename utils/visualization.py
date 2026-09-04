@@ -91,10 +91,10 @@ def validate_plot_trajectories(reference, ins, algorithms=None):
 
 
 def elapsed_seconds(length, timestamps=None, dt=15.0):
-    """生成从首个采样点起算的经过秒数。
+    """生成经过秒数，并统一校验转换结果的有限性与严格递增性。
 
     Args:
-        length: 非空参考轨迹的长度。
+        length: 已校验的非空参考轨迹的长度。
         timestamps: 可选的长度为 length 的数值秒或 datetime64 数组。
         dt: 未提供时间戳时的采样间隔，单位为秒。
 
@@ -113,15 +113,11 @@ def elapsed_seconds(length, timestamps=None, dt=15.0):
         if values.shape != (length,):
             raise ValueError("timestamps must have shape (N,)")
         if values.dtype.kind == "M":
-            if np.isnat(values).any():
-                raise ValueError("timestamps must not contain NaT")
             if np.datetime_data(values.dtype)[0] in {"Y", "M"}:
                 values = values.astype("datetime64[D]")
             elapsed = (values - values[0]) / np.timedelta64(1, "s")
         elif values.dtype.kind in "iuf":
             values = values.astype(np.float64)
-            if not np.isfinite(values).all():
-                raise ValueError("timestamps must contain only finite seconds")
             with np.errstate(over="ignore", invalid="ignore"):
                 elapsed = values - values[0]
         else:
@@ -217,26 +213,19 @@ def pixel_to_map_coordinates(trajectory, transform):
     """将像素中心轨迹转换到 TIFF 的原始坐标系。
 
     Args:
-        trajectory: 形状为 (M, 2) 的像素轨迹，列顺序为 [x, y]。
-        transform: TIFF 仿射变换，基于像素边界坐标。
+        trajectory: 已校验的形状为 (M, 2) 的像素轨迹，列顺序为 [x, y]。
+        transform: 已校验的 TIFF 仿射变换，基于像素边界坐标。
 
     Returns:
         numpy.ndarray: 形状为 (M, 2) 的地图坐标，不修改输入。
-
-    Raises:
-        ValueError: 变换后的坐标超出有限数值范围。
     """
     centers = trajectory + 0.5
-    with np.errstate(over="ignore", invalid="ignore"):
-        coordinates = np.column_stack(
-            (
-                transform.a * centers[:, 0] + transform.b * centers[:, 1] + transform.c,
-                transform.d * centers[:, 0] + transform.e * centers[:, 1] + transform.f,
-            )
+    return np.column_stack(
+        (
+            transform.a * centers[:, 0] + transform.b * centers[:, 1] + transform.c,
+            transform.d * centers[:, 0] + transform.e * centers[:, 1] + transform.f,
         )
-    if not np.isfinite(coordinates).all():
-        raise ValueError("Transformed trajectory coordinates must remain finite")
-    return coordinates
+    )
 
 
 def coordinate_labels(crs):
@@ -293,24 +282,18 @@ def position_errors(reference, algorithms, resolution):
     """分别计算算法轨迹相对参考前缀的米制位置误差。
 
     Args:
-        reference: 形状为 (N, 2) 的参考轨迹。
+        reference: 已校验的形状为 (N, 2) 的参考轨迹。
         algorithms: 已校验的算法轨迹词典。
-        resolution: 有限正数，单位为米/像素。
+        resolution: 已校验的有限正数，单位为米/像素。
 
     Returns:
         dict: 非空算法轨迹对应的一维米制误差数组。
-
-    Raises:
-        ValueError: 误差超出有限数值范围。
     """
     errors = {}
     for name, trajectory in algorithms.items():
         if len(trajectory) == 0:
             continue
-        with np.errstate(over="ignore", invalid="ignore"):
-            difference = trajectory - reference[: len(trajectory)]
-            error = np.hypot(difference[:, 0], difference[:, 1]) * resolution
-        if not np.isfinite(error).all():
-            raise ValueError(f"Position errors for {name!r} must remain finite")
+        difference = trajectory - reference[: len(trajectory)]
+        error = np.hypot(difference[:, 0], difference[:, 1]) * resolution
         errors[name] = error
     return errors
