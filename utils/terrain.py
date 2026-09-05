@@ -15,11 +15,11 @@ def prepare_terrain(terrain_map):
         numpy.ndarray: float64 只读地形副本。
 
     Raises:
-        ValueError: 栅格小于 2×2 或包含无穷值。
+        ValueError: 栅格不是二维或小于 2×2。
     """
     field = real_array(terrain_map, "terrain_map", 2)
-    if min(field.shape) < 2 or np.isinf(field).any():
-        raise ValueError("terrain_map must be at least 2x2 and contain no infinities")
+    if min(field.shape) < 2:
+        raise ValueError("terrain_map must be at least 2x2")
     field = field.copy(order="C")
     field.setflags(write=False)
     return field

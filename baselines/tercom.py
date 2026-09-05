@@ -28,7 +28,7 @@ class TercomLocator(BaseLocator):
             numpy.ndarray: 形状为 (max(N-L+1, 0), 2) 的 float64 修正轨迹。
 
         Raises:
-            ValueError: 输入形状或数值不合法。
+            ValueError: 输入形状不合法。
         """
         ins, depths, starts, corrected = self._prepare(
             reference_trajectory, ins_trajectory, depth_observations

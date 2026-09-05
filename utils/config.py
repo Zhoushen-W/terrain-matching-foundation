@@ -3,7 +3,6 @@
 from copy import deepcopy
 from pathlib import Path
 
-import numpy as np
 import yaml
 
 
@@ -34,7 +33,7 @@ def _merge_config(defaults, overrides, prefix=""):
 
 
 def _validate_config(config, prefix=""):
-    """按约定的字段类型校验数值范围和首版步长约束。
+    """校验明确的比例区间和首版步长约束。
 
     Args:
         config: 字段类型符合默认配置约定的配置字典。
@@ -44,25 +43,16 @@ def _validate_config(config, prefix=""):
         None: 校验成功时正常返回。
 
     Raises:
-        ValueError: 数值非有限或超出允许范围。
+        ValueError: 数值超出明确区间或步长不受支持。
     """
     for key, value in config.items():
         name = f"{prefix}.{key}" if prefix else key
         if isinstance(value, dict):
             _validate_config(value, name)
             continue
-        if key == "use_kf":
-            continue
-        if not np.isfinite(value):
-            raise ValueError(f"{name} must be finite")
-        allow_zero = (
-            key.endswith("radius") or key.startswith("process_") or key == "seed"
-        )
-        if value < 0 or (value == 0 and not allow_zero):
-            raise ValueError(f"{name} is outside its allowed range")
         if key == "stride" and value != 1:
             raise ValueError("Only stride=1 is supported")
-        if key == "resample_threshold" and value > 1:
+        if key == "resample_threshold" and not 0 < value <= 1:
             raise ValueError(f"{name} must be in (0, 1]")
 
 
@@ -77,7 +67,7 @@ def load_config(default_path, config_path=None):
         dict: 经过校验的独立配置。
 
     Raises:
-        ValueError: 配置包含未知字段、非有限数值或非法范围。
+        ValueError: 配置包含未知字段、超出明确区间或步长不受支持。
         OSError: 配置文件无法读取。
     """
     with Path(default_path).open(encoding="utf-8") as stream:

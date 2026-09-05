@@ -88,7 +88,7 @@ class LocatorTests(ConfigTestCase):
             assert_array_equal(original, current)
 
     def test_validation_and_invalid_config(self):
-        """验证数组契约、有限性和配置取值范围约束。
+        """验证关键数组形状、配置字段和明确取值范围约束。
 
         Args:
             无。
@@ -99,29 +99,32 @@ class LocatorTests(ConfigTestCase):
         field, reference, depths = synthetic_data(count=8)
         path = self.config_path(self.small_config())
         cases = (
+            (reference[:, 0], reference, depths),
             (reference[:, :1], reference, depths),
+            (reference, reference[:, 0], depths),
             (reference, reference[:-1], depths),
             (reference, reference, depths[:, None]),
-            (reference, reference.astype(complex), depths),
-            (reference, reference + np.nan, depths),
-            (reference, reference, depths + np.inf),
+            (reference, reference, depths[:-1]),
         )
         for locator_type in LOCATORS:
             locator = locator_type(field, path)
             for arrays in cases:
                 with self.assertRaises(ValueError):
                     locator.localize_trajectory(*arrays)
-            for invalid_map in (np.ones((1, 8)), field + np.inf, field.astype(complex)):
+            for invalid_map in (
+                np.ones((1, 8)),
+                np.empty((0, 8)),
+                np.empty((8, 0)),
+                np.ones((2, 2, 2)),
+            ):
                 with self.assertRaises(ValueError):
                     locator_type(invalid_map, path)
         configs = (
             {"common": {"stride": 2}},
-            {"common": {"window_size": 0}},
-            {"pf": {"seed": -1}},
-            {"pf": {"observation_std": 0}},
+            {"pf": {"resample_threshold": 0}},
+            {"pf": {"resample_threshold": -0.1}},
             {"pf": {"resample_threshold": 1.1}},
             {"common": {"misspelled": 1}},
-            {"iccp": {"init_step": float("nan")}},
         )
         for config in configs:
             with self.assertRaises(ValueError):

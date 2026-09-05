@@ -4,7 +4,7 @@ import numpy as np
 
 
 def real_array(value, name, ndim):
-    """校验实数 NumPy 数组并转换计算精度。
+    """校验数组维度并转换计算精度，实数 NumPy 类型由调用方保证。
 
     Args:
         value: 输入数组。
@@ -15,12 +15,10 @@ def real_array(value, name, ndim):
         numpy.ndarray: float64 数组，可能与输入共享内存。
 
     Raises:
-        ValueError: 输入类型或维度不合法。
+        ValueError: 输入维度不合法。
     """
-    if not isinstance(value, np.ndarray):
-        raise ValueError(f"{name} must be a NumPy array")
-    if value.ndim != ndim or value.dtype.kind not in "iuf":
-        raise ValueError(f"{name} must be a {ndim}D real numeric array")
+    if value.ndim != ndim:
+        raise ValueError(f"{name} must be a {ndim}D array")
     return np.asarray(value, dtype=np.float64)
 
 
@@ -36,7 +34,7 @@ def validate_trajectories(reference, ins, depths):
         tuple: float64 INS 轨迹和深度观测。
 
     Raises:
-        ValueError: 输入形状不一致或存在非有限值。
+        ValueError: 输入形状不一致。
     """
     reference = real_array(reference, "reference_trajectory", 2)
     ins = real_array(ins, "ins_trajectory", 2)
@@ -45,9 +43,6 @@ def validate_trajectories(reference, ins, depths):
         raise ValueError("Both trajectories must have the same shape (N, 2)")
     if depths.shape != (len(ins),):
         raise ValueError("depth_observations must have shape (N,)")
-    for name, array in (("reference", reference), ("ins", ins), ("depths", depths)):
-        if not np.isfinite(array).all():
-            raise ValueError(f"{name} must contain only finite values")
     return ins, depths
 
 

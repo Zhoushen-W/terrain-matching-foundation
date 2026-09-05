@@ -170,7 +170,7 @@ def plot_trajectory_comparison(
         tuple: (trajectory_figure, error_figure)，供调用方继续编辑或关闭。
 
     Raises:
-        ValueError: 轨迹、时间戳、分辨率、地理参考或波段不合法。
+        ValueError: 轨迹形状、时间戳形状或顺序、地理参考或波段不合法。
         rasterio.errors.RasterioIOError: TIFF 无法读取。
         OSError: 输出目录或图片无法写入。
     """

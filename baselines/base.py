@@ -43,7 +43,7 @@ class BaseLocator:
             tuple: INS、深度、窗口起点以及独立输出数组。
 
         Raises:
-            ValueError: 输入形状或数值不合法。
+            ValueError: 输入形状不合法。
         """
         ins, depths = validate_trajectories(
             reference_trajectory, ins_trajectory, depth_observations

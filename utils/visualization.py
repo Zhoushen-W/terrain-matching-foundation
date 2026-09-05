@@ -12,22 +12,16 @@ from utils.inputs import real_array
 
 
 def positive_scalar(value, name):
-    """校验数值参数的有限性和正值范围。
+    """将约定为有限正数的参数转换为浮点数，由调用方保证数值性质。
 
     Args:
-        value: 待校验的数值。
-        name: 用于错误信息的参数名称。
+        value: 按调用约定提供的有限正数。
+        name: 参数名称，保留以兼容现有调用。
 
     Returns:
-        float: 有限的正数。
-
-    Raises:
-        ValueError: 参数不是有限正数。
+        float: 转换后的数值。
     """
-    value = float(value)
-    if not np.isfinite(value) or value <= 0:
-        raise ValueError(f"{name} must be a finite positive number")
-    return value
+    return float(value)
 
 
 def _validate_path(trajectory, name):
@@ -38,14 +32,14 @@ def _validate_path(trajectory, name):
         name: 用于错误信息的轨迹名称。
 
     Returns:
-        numpy.ndarray: 形状为 (M, 2) 的有限 float64 轨迹。
+        numpy.ndarray: 形状为 (M, 2) 的 float64 轨迹。
 
     Raises:
-        ValueError: 轨迹类型、形状或数值不合法。
+        ValueError: 轨迹形状不合法。
     """
     trajectory = real_array(trajectory, name, 2)
-    if trajectory.shape[1] != 2 or not np.isfinite(trajectory).all():
-        raise ValueError(f"{name} must have shape (M, 2) and contain finite values")
+    if trajectory.shape[1] != 2:
+        raise ValueError(f"{name} must have shape (M, 2)")
     return trajectory
 
 
@@ -61,7 +55,7 @@ def validate_plot_trajectories(reference, ins, algorithms=None):
         tuple: float64 参考轨迹、INS 轨迹及保持输入顺序的算法词典。
 
     Raises:
-        ValueError: 轨迹形状、长度或数值不合法。
+        ValueError: 轨迹形状或长度不合法。
     """
     reference = _validate_path(reference, "reference_trajectory")
     ins = _validate_path(ins, "ins_trajectory")
@@ -83,7 +77,7 @@ def validate_plot_trajectories(reference, ins, algorithms=None):
 
 
 def elapsed_seconds(length, timestamps=None, dt=15.0):
-    """生成经过秒数，并统一校验转换结果的有限性与严格递增性。
+    """生成经过秒数，并校验外部时间戳的形状与严格递增性。
 
     Args:
         length: 已校验的非空参考轨迹的长度。
@@ -94,12 +88,11 @@ def elapsed_seconds(length, timestamps=None, dt=15.0):
         numpy.ndarray: 长度为 length 的 float64 时间数组，从零开始。
 
     Raises:
-        ValueError: 时间戳形状、类型、有限性或递增顺序不合法。
+        ValueError: 时间戳形状或递增顺序不合法。
     """
     if timestamps is None:
         dt = positive_scalar(dt, "dt")
-        with np.errstate(over="ignore"):
-            elapsed = np.arange(length, dtype=np.float64) * dt
+        elapsed = np.arange(length, dtype=np.float64) * dt
     else:
         values = np.asarray(timestamps)
         if values.shape != (length,):
@@ -108,18 +101,12 @@ def elapsed_seconds(length, timestamps=None, dt=15.0):
             if np.datetime_data(values.dtype)[0] in {"Y", "M"}:
                 values = values.astype("datetime64[D]")
             elapsed = (values - values[0]) / np.timedelta64(1, "s")
-        elif values.dtype.kind in "iuf":
-            values = values.astype(np.float64)
-            with np.errstate(over="ignore", invalid="ignore"):
-                elapsed = values - values[0]
         else:
-            raise ValueError(
-                "timestamps must contain numeric seconds or datetime64 values"
-            )
-    elapsed = np.asarray(elapsed, dtype=np.float64)
-    if not np.isfinite(elapsed).all() or np.any(np.diff(elapsed) <= 0):
-        raise ValueError("Elapsed timestamps must be finite and strictly increasing")
-    return elapsed
+            values = values.astype(np.float64)
+            elapsed = values - values[0]
+        if np.any(np.diff(elapsed) <= 0):
+            raise ValueError("Elapsed timestamps must be strictly increasing")
+    return np.asarray(elapsed, dtype=np.float64)
 
 
 def algorithm_colors(names):
@@ -169,23 +156,17 @@ def read_georeferenced_terrain(terrain_path, band=1):
                     raise ValueError(
                         "The TIFF must define a coordinate reference system"
                     )
-                if not np.isfinite(tuple(transform)).all() or transform.is_degenerate:
+                if transform.is_degenerate:
                     raise ValueError(
-                        "The TIFF must define a finite invertible affine transform"
+                        "The TIFF must define an invertible affine transform"
                     )
                 if transform.is_identity and (dataset.gcps[0] or dataset.rpcs):
                     raise ValueError(
                         "GCP/RPC-only TIFFs require an affine georeference"
                     )
                 terrain = dataset.read(int(band), masked=True)
-                if terrain.dtype.kind not in "iuf":
-                    raise ValueError(
-                        "The terrain band must contain real numeric depths"
-                    )
                 terrain = terrain.astype(np.float64)
                 scale, offset = dataset.scales[band - 1], dataset.offsets[band - 1]
-                if not np.isfinite([scale, offset]).all():
-                    raise ValueError("The terrain band scale and offset must be finite")
                 with np.errstate(over="ignore", invalid="ignore"):
                     terrain = np.ma.masked_invalid(terrain * scale + offset)
                 unit = dataset.units[band - 1]
@@ -274,7 +255,7 @@ def position_errors(reference, algorithms, resolution):
     Args:
         reference: 已校验的形状为 (N, 2) 的参考轨迹。
         algorithms: 已校验的算法轨迹词典。
-        resolution: 已校验的有限正数，单位为米/像素。
+        resolution: 调用方保证的有限正数，单位为米/像素。
 
     Returns:
         dict: 非空算法轨迹对应的一维米制误差数组。
