@@ -13,7 +13,18 @@ TERCOM 和 ICCP 可选开启卡尔曼滤波（KF）；四种方法使用统一�
 
 支持 Python 3.10+。在其他项目中使用：
 
-1. 打开 [GitHub 仓库](https://github.com/Zhoushen-W/terrain-matching-foundation)，选择 **Code → Download ZIP**，解压到目标项目的 `vendor/terrain-matching-foundation/`，确保该目录直接包含 `pyproject.toml`。
+1. 获取源码到目标项目的 `vendor/terrain-matching-foundation/`，确保该目录直接包含 `pyproject.toml`：
+
+   - Windows：打开 [GitHub 仓库](https://github.com/Zhoushen-W/terrain-matching-foundation)，选择 **Code → Download ZIP**，解压后重命名为 `terrain-matching-foundation`。
+   - Linux：
+
+     ```shell
+     mkdir -p vendor && cd vendor
+     git clone https://github.com/Zhoushen-W/terrain-matching-foundation.git
+     cd terrain-matching-foundation && rm -rf .git
+     ```
+
+     删除 `.git` 后，包内改动不会被自身的 Git 跟踪，修改包内代码不受限制。
 2. 在目标项目的 `.gitignore` 中添加：
 
    ```gitignore
