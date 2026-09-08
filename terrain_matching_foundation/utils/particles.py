@@ -3,7 +3,7 @@
 import numpy as np
 from scipy.special import logsumexp
 
-from utils.terrain import bilinear_sample
+from terrain_matching_foundation.utils.terrain import bilinear_sample
 
 
 def update_log_weights(field, particles, log_weights, observation, sigma):

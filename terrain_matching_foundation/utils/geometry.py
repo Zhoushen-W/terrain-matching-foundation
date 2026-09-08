@@ -3,7 +3,7 @@
 import contourpy
 import numpy as np
 
-from utils.terrain import bilinear_sample
+from terrain_matching_foundation.utils.terrain import bilinear_sample
 
 
 def rotation_matrix(angle):

@@ -8,7 +8,7 @@ import rasterio
 from matplotlib.ticker import ScalarFormatter
 from rasterio.errors import NotGeoreferencedWarning
 
-from utils.inputs import real_array
+from terrain_matching_foundation.utils.inputs import real_array
 
 
 def positive_scalar(value, name):

@@ -5,6 +5,6 @@ build/
 dist/
 .ruff_cache/
 .codex_tmp/
-.tests/
+/tests/
+/docs/
 AGENTS.md
-VALIDATION.md

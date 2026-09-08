@@ -2,7 +2,7 @@
 
 import numpy as np
 
-from utils.inputs import real_array
+from terrain_matching_foundation.utils.inputs import real_array
 
 
 def prepare_terrain(terrain_map):

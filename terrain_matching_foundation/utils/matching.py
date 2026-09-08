@@ -2,7 +2,7 @@
 
 import numpy as np
 
-from utils.terrain import bilinear_sample
+from terrain_matching_foundation.utils.terrain import bilinear_sample
 
 
 def search_axis(radius, step):

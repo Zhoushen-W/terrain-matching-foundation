@@ -5,7 +5,7 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 from matplotlib.transforms import Affine2D
 
-from utils.visualization import (
+from terrain_matching_foundation.utils.visualization import (
     algorithm_colors,
     center_trajectory_axes,
     coordinate_labels,

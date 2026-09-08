@@ -5,11 +5,15 @@ from collections import deque
 
 import numpy as np
 
-from baselines.base import BaseLocator
-from utils.geometry import TerrainContours, apply_transform, fit_rigid_transform
-from utils.kalman import TransformKalman, wrap_angle
-from utils.matching import mad_search
-from utils.terrain import bilinear_sample
+from terrain_matching_foundation.baselines.base import BaseLocator
+from terrain_matching_foundation.utils.geometry import (
+    TerrainContours,
+    apply_transform,
+    fit_rigid_transform,
+)
+from terrain_matching_foundation.utils.kalman import TransformKalman, wrap_angle
+from terrain_matching_foundation.utils.matching import mad_search
+from terrain_matching_foundation.utils.terrain import bilinear_sample
 
 logger = logging.getLogger(__name__)
 

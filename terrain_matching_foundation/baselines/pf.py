@@ -4,8 +4,8 @@ import logging
 
 import numpy as np
 
-from baselines.base import BaseLocator
-from utils.particles import (
+from terrain_matching_foundation.baselines.base import BaseLocator
+from terrain_matching_foundation.utils.particles import (
     effective_sample_size,
     systematic_resample,
     update_log_weights,

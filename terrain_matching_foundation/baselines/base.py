@@ -4,13 +4,16 @@ from pathlib import Path
 
 import numpy as np
 
-from utils.config import load_config
-from utils.inputs import validate_trajectories, window_starts
-from utils.terrain import prepare_terrain
+from terrain_matching_foundation.utils.config import load_config
+from terrain_matching_foundation.utils.inputs import (
+    validate_trajectories,
+    window_starts,
+)
+from terrain_matching_foundation.utils.terrain import prepare_terrain
 
 
 class BaseLocator:
-    """供三个定位器复用的轻量公共基类。"""
+    """供各定位器复用的轻量公共基类。"""
 
     def __init__(self, terrain_map, config_path=None):
         """加载配置并持有独立的只读地图。

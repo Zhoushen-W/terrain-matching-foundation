@@ -37,3 +37,9 @@ pf:
   observation_std: 1.0
   resample_threshold: 0.5
   seed: 0
+
+pmf:
+  init_radius: 32.0
+  grid_step: 0.5
+  process_std: 0.5
+  observation_std: 1.0

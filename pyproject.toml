@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "terrain-matching-baselines"
 version = "0.1.0"
-description = "Pixel-coordinate TERCOM, ICCP and particle-filter baselines"
+description = "Pixel-coordinate TERCOM, ICCP, particle and point-mass filter baselines"
 requires-python = ">=3.10"
 dependencies = [
     "numpy>=1.24",
@@ -20,10 +20,11 @@ dependencies = [
 dev = ["ruff>=0.8"]
 
 [tool.setuptools.packages.find]
-include = ["baselines*", "utils*", "scripts*"]
+include = ["terrain_matching_foundation", "terrain_matching_foundation.*"]
+namespaces = false
 
 [tool.setuptools.package-data]
-baselines = ["*.yaml"]
+"terrain_matching_foundation.baselines" = ["*.yaml"]
 
 [tool.ruff]
 line-length = 88

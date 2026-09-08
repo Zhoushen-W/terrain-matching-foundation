@@ -4,9 +4,9 @@ import logging
 
 import numpy as np
 
-from baselines.base import BaseLocator
-from utils.kalman import TransformKalman
-from utils.matching import mad_search
+from terrain_matching_foundation.baselines.base import BaseLocator
+from terrain_matching_foundation.utils.kalman import TransformKalman
+from terrain_matching_foundation.utils.matching import mad_search
 
 logger = logging.getLogger(__name__)
 
